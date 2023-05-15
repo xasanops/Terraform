@@ -9,15 +9,13 @@ module "vpc" {
   vpc_cidr = var.vpc_cidr
   #[Azs]
   azs = var.azs
-  #[Public Subnets]
-  cidr_public_subnet_az1 = var.cidr_public_subnet_az1
-  cidr_public_subnet_az2 = var.cidr_public_subnet_az2
-  #[Private Subnets]
-  cidr_private_subnet_az1 = var.cidr_private_subnet_az1
-  cidr_private_subnet_az2 = var.cidr_private_subnet_az2
-  #[Database Subnets]
-  cidr_database_subnet_az1 = var.cidr_database_subnet_az1
-  cidr_database_subnet_az2 = var.cidr_database_subnet_az2
+  #[Public Web Tier]
+  cidr_public_subnet = var.cidr_public_subnet
+  #[Private App Tier]
+  cidr_private_subnet = var.cidr_private_subnet
+  #[Database Tier]
+  cidr_db_subnet = var.cidr_db_subnet
+  db_subnet_group = true
 }
 
 #[Retrieve VPC ID of Child Module]

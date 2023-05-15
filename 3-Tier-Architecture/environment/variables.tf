@@ -1,57 +1,43 @@
-# generic variables ✅
+#generic variables ✅
+variable "aws_region" {
+  description = "AWS Region"
+  type        = string
+}
 variable "environment" {
   description = "Testing environment"
   type        = string
 }
 
-variable "aws_region" {
-  description = "AWS region"
-  type        = string
-}
-#vpc variables
-variable "vpc_cidr" {
+#aws_vpc variables ✅
+variable "vpc_name" {
   description = "name of my vpc"
   type        = string
+  default     = "main_vpc"
 }
-
-variable "vpc_name" {
+variable "vpc_cidr" {
   description = "vpc cidr block"
   type        = string
 }
 
-#availability zone variable
+#availability zone variable ✅
 variable "azs" {
-  description = "availability zones for region"
+  description = "availability zones"
   type        = list(string)
 }
 
-#public subnet variables 
-variable "cidr_public_subnet_az1" {
-  description = "public subnet CIDR values - az1"
-  type        = string
+#aws_subnet public & private variables ✅
+variable "cidr_public_subnet" {
+  description = "public subnet CIDR values"
+  type        = list(string)
 }
-variable "cidr_public_subnet_az2" {
-  description = "public subnet CIDR values - az2"
-  type        = string
-}
-
-#private subnet variables 
-variable "cidr_private_subnet_az1" {
-  description = "private subnet CIDR values - az1"
-  type        = string
-}
-variable "cidr_private_subnet_az2" {
-  description = "private subnet CIDR values - az2"
-  type        = string
+variable "cidr_private_subnet" {
+  description = "private subnet CIDR values"
+  type        = list(string)
 }
 
-#database subnet variables
-variable "cidr_database_subnet_az1" {
-  description = "private database subnet CIDR values - az1"
-  type        = string
+#aws_subnet database subnet variables ✅
+variable "cidr_db_subnet" {
+  description = "private database subnet CIDR values"
+  type        = list(string)
+}
 
-}
-variable "cidr_database_subnet_az2" {
-  description = "private database subnet CIDR values - az2"
-  type        = string
-}

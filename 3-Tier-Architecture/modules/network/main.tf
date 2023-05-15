@@ -8,27 +8,16 @@ resource "aws_vpc" "main" {
   }
 }
 
-# Create Public Subnet Az1 for Web Tier ✅
-resource "aws_subnet" "public_subnet_az1" {
+# Create Public Subnets for Web Tier ✅
+resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = var.cidr_public_subnet_az1
-  availability_zone       = var.azs[0]
+  availability_zone       = element(var.azs, count.index)
+  cidr_block              = element(var.cidr_public_subnet, count.index)
+  count                   = length(var.cidr_public_subnet)
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "Public Subnet - 1"
-  }
-}
-
-# Create Public Subnet Az2 for Web Tier ✅
-resource "aws_subnet" "public_subnet_az2" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = var.cidr_public_subnet_az2
-  availability_zone       = var.azs[1]
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "Public Subnet - 2"
+    Name = "Public Subnet #${count.index + 1}"
   }
 }
 
@@ -37,11 +26,11 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "${var.environment}-vpc"
+    Name = "${var.environment}-igw"
   }
 }
 
-# Create Internet Gateway for Public Subnets ✅
+# Create Route Table for Public Subnets ✅
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
   route {
@@ -53,56 +42,73 @@ resource "aws_route_table" "public" {
   }
 }
 
+
 # Associate Route Table with Public Subnets ✅
-resource "aws_route_table_association" "public_az1" {
-  subnet_id      = aws_subnet.public_subnet_az1.id
+resource "aws_route_table_association" "public" {
+  count          = length(var.cidr_public_subnet)
+  subnet_id      = element(aws_subnet.public.*.id, count.index)
   route_table_id = aws_route_table.public.id
 }
 
-resource "aws_route_table_association" "public_az2" {
-  subnet_id      = aws_subnet.public_subnet_az2.id
-  route_table_id = aws_route_table.public.id
+# Create an EIP Address for NAT Gateway in order to have a fixed public IP address ✅
+resource "aws_eip" "nat_gateway" {
+  vpc = true
 }
 
-# Create Private Subnet Az1 for Application Tier ✅
-resource "aws_subnet" "private_subnet_az1" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.cidr_private_subnet_az1
-  availability_zone = var.azs[0]
-
-  tags = {
-    Name = "Private Subnet - 1"
-
-  }
+# Create a Nat Gateway for private subnets ✅
+resource "aws_nat_gateway" "main" {
+  allocation_id = aws_eip.nat_gateway.id
+  subnet_id     = aws_subnet.public[1].id
 }
-# Create Private Subnet Az2 for Application Tier ✅
-resource "aws_subnet" "private_subnet_az2" {
+
+# Create Private Subnets for Application Tier ✅
+resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = var.cidr_private_subnet_az2
-  availability_zone = var.azs[1]
+  count             = length(var.cidr_public_subnet)
+  cidr_block        = element(var.cidr_private_subnet, count.index)
+  availability_zone = element(var.azs, count.index)
   tags = {
-    Name = "Private Subnet - 2"
+    Name = "Private Subnet #${count.index + 1}"
   }
 }
 
-# Create Private Subnet Az1 for Database Tier ✅
-resource "aws_subnet" "db_az1" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.cidr_database_subnet_az1
-  availability_zone = var.azs[0]
-
+# Create Route Table for Private Subnets ✅
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.main.id
+  }
   tags = {
-    Name = "Database Subnet - 1"
-
+    Name = "Route Table for Private Subnets"
   }
 }
 
-# Create Private Subnet Az2 for Database Tier ✅
-resource "aws_subnet" "db_az2" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.cidr_database_subnet_az2
-  availability_zone = var.azs[1]
+# Associate Route Table with Private Subnets ✅
+resource "aws_route_table_association" "private" {
+  count          = length(var.cidr_public_subnet)
+  subnet_id      = element(aws_subnet.private.*.id, count.index)
+  route_table_id = aws_route_table.private.id
+}
+
+# Create Private Subnet for Database Tier ✅
+resource "aws_subnet" "db" {
+  vpc_id                  = aws_vpc.main.id
+  count                   = length(var.cidr_db_subnet)
+  cidr_block              = element(var.cidr_db_subnet, count.index)
+  map_public_ip_on_launch = false
+  availability_zone       = element(var.azs, count.index)
   tags = {
-    Name = "Database Subnet - 2"
+    Name = "Database Subnet #${count.index + 1}"
   }
 }
+
+# Create Database Subnet Group ✅
+resource "aws_db_subnet_group" "rds" {
+  count      = var.db_subnet_group == true ? 1 : 0
+  name       = "main_rds_subnet_group"
+  subnet_ids = aws_subnet.db[*].id
+}
+
+
+
