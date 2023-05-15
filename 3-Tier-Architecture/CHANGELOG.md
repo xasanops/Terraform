@@ -14,4 +14,4 @@
 
 - Added aws_db_subnet_group resource to create a subnet group for RDS instances. This is useful for managing RDS instances that span multiple subnets.
 
-## [v1.0.0] - Initial release
+## [v1.0.0] - Initial Release
