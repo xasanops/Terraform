@@ -2,7 +2,7 @@
 
 - Refactored variable names to be more concise and consistent.
 
-– Consolidated subnet creation into a single resource block using element(), length(), count, and count.index to create multiple subnets. More Dynamic!
+- Consolidated subnet creation into a single resource block using element(), length(), count, and count.index to create multiple subnets. More Dynamic!
 
 - Added aws_eip resource to allocate Elastic IP address for NAT gateway. This is necessary to allow resources in the private subnets to access the internet.
 
