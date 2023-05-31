@@ -3,7 +3,7 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 4.0"
-      # 25/05/2023- Terraform released v5.0.0❕ So be sure to specify a version you have been using late for example "~> 4.0"
+      # 25/05/2023- Terraform released v5.0.0❕ Be sure to specify a version you have been using for example "~> 4.0"
     }
   }
 }
