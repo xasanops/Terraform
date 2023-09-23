@@ -1,4 +1,4 @@
-# -- ROOT MODULE 🔑 --
+# -- ROOT MODULE 🔑 -- #
 
 terraform {
   required_providers {
