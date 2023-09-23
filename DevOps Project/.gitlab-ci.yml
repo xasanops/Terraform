@@ -1,0 +1,115 @@
+image:
+  name: hashicorp/terraform:light
+  entrypoint: [""]
+
+variables:
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_KEY}
+
+cache:
+  paths:
+    - .terraform
+    - environment/dev/.terraform
+    - environment/stage/.terraform
+    - environment/prod/.terraform
+
+stages:
+  - plan
+  - apply
+  - destroy
+
+dev_plan:
+  stage: plan
+  environment:
+    name: dev
+  script:
+    - cd environment/dev
+    - terraform init
+    - terraform validate
+    - export DB_USERNAME=$DB_USERNAME_DEV
+    - export DB_PASSWORD=$DB_PASSWORD_DEV
+    - terraform plan -var="db_username=$DB_USERNAME" -var="db_password=$DB_PASSWORD" -out="planfile"
+  artifacts:
+    paths:
+      - environment/dev
+
+stage_plan:
+  environment:
+    name: stage
+  stage: plan
+  script:
+    - cd environment/stage
+    - terraform init
+    - terraform validate
+    - export DB_USERNAME=$DB_USERNAME_STAGE
+    - export DB_PASSWORD=$DB_PASSWORD_STAGE
+    - terraform plan -var="db_username=$DB_USERNAME" -var="db_password=$DB_PASSWORD" -out="planfile"
+  artifacts:
+    paths:
+      - environment/stage
+
+prod_plan:
+  environment:
+    name: prod
+  stage: plan
+  script:
+    - cd environment/prod
+    - terraform init
+    - terraform validate
+    - export DB_USERNAME=$DB_USERNAME_PROD
+    - export DB_PASSWORD=$DB_PASSWORD_PROD
+    - terraform plan -var="db_username=$DB_USERNAME" -var="db_password=$DB_PASSWORD" -out="planfile"
+  artifacts:
+    paths:
+      - environment/prod
+
+dev_apply:
+  stage: apply
+  environment:
+    name: dev
+  script:
+    - cd environment/dev
+    - terraform apply --auto-approve -input=false "planfile"
+
+stage_apply:
+  stage: apply
+  environment:
+    name: stage
+  script:
+    - cd environment/stage
+    - terraform apply --auto-approve -input=false "planfile"
+
+prod_apply:
+  stage: apply
+  environment:
+    name: prod
+  script:
+    - cd environment/prod
+    - terraform apply --auto-approve -input=false "planfile"
+
+dev_destroy:
+  stage: destroy
+  environment:
+    name: dev
+  when: manual
+  script:
+    - cd environment/dev
+    - terraform destroy --auto-approve -var="db_username=$DB_USERNAME" -var="db_password=$DB_PASSWORD"
+
+stage_destroy:
+  stage: destroy
+  environment:
+    name: stage
+  when: manual
+  script:
+    - cd environment/stage
+    - terraform destroy --auto-approve -var="db_username=$DB_USERNAME" -var="db_password=$DB_PASSWORD"
+
+prod_destroy:
+  stage: destroy
+  environment:
+    name: prod
+  when: manual
+  script:
+    - cd environment/prod
+    - terraform destroy --auto-approve -var="db_username=$DB_USERNAME" -var="db_password=$DB_PASSWORD"
