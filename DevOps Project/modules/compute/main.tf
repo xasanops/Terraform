@@ -11,12 +11,6 @@ locals {
   latest_ami = data.aws_ami.main.id
 }
 
-# resource "aws_key_pair" "deploy" {
-#   key_name   = "my_key"
-#   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCrARb9XzsJgIWQLUHuLV1YYJiwzC5ApiTYJNc3m+y350U5b0gRrhgvlCrZqDDxSkhWiYdK8jy/cJtFe/M8nSwJAVRK3yWoqYhrFfDxobpjzJllaLj5I8IRME78BfaFSd2FeS2I0wWGuWm1XRps+Ia+gCn8bCwx1JnnFdKVrzWeo/C2damBoQYpkROjRADQCbLG+PuCBi03h+iNF/uborH700iX1dM6JYBiIiJf4c2lnxGCCagGhmEpBcXnI0xbQwXGHU+w0MivoqAJKIc1SYH9Y5M1PNFm7SGccrxcKpFbaJ5wm3ksK38M1GFTwg7nFJST9wdsTzlY/Q2jFgnMHLuZ leeban@Leebans-MBP"
-# }
-
-
 resource "aws_instance" "main" {
   count                  = 2
   ami                    = local.latest_ami
@@ -30,7 +24,6 @@ resource "aws_instance" "main" {
     Name = "${var.ec2_instance} #${count.index + 1} - ${var.environment}"
   }
 }
-
 
 resource "aws_security_group" "web_tier" {
   name   = "web_tier_security_group"
